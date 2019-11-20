@@ -242,6 +242,7 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
             # Read next image
             success, image = vcapture.read()
             if success:
+
                 # OpenCV returns images as BGR, convert to RGB
                 image = image[..., ::-1]
                 # Detect objects
@@ -253,8 +254,15 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
                 # RGB -> BGR to save image to video
                 splash = splash[..., ::-1]
                 # BBOX Rectangle
-                bbox = draw_box(splash,r['rois'],[255,0,0])
+                if(r['rois'] !=[]):
+                    print(r['rois'].shape)
+                    if(r['rois'].shape[0]>0 and r['rois'].shape[1]==4):
+                        bbox = draw_box(splash,r['rois'][0],[255,0,0])
+                    
+                #bbox = draw_box(splash,r['rois'][0],[255,0,0])
+                #print(r['rois'])
                 # Add image to video writer
+
                 vwriter.write(splash)
                 count += 1
         vwriter.release()
@@ -292,7 +300,7 @@ if __name__ == '__main__':
     elif args.command == "splash":
         assert args.image or args.video,\
                "Provide --image or --video to apply color splash"
-    elif arg.command = "visualize":
+    elif arg.command == "visualize":
         assert args.image or args.video,\
                "Provide --image or --video to apply visualize box"
 
