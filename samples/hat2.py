@@ -207,7 +207,7 @@ def draw_box(image, box, color):
 
 def detect_and_color_splash(model, image_path=None, video_path=None):
     assert image_path or video_path
-
+    class_name=['BG','hat']
     # Image or video?
     if image_path:
         # Run model detection and generate the color splash effect
@@ -245,11 +245,12 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
 
                 # OpenCV returns images as BGR, convert to RGB
                 image = image[..., ::-1]
+                
                 # Detect objects
                 r = model.detect([image], verbose=0)[0]
                 # Color splash
                 splash = color_splash(image, r['masks'])
-                
+                print(r['masks'].shape)
 
                 # RGB -> BGR to save image to video
                 splash = splash[..., ::-1]
@@ -257,8 +258,17 @@ def detect_and_color_splash(model, image_path=None, video_path=None):
                 if(r['rois'] !=[]):
                     print(r['rois'].shape)
                     if(r['rois'].shape[0]>0 and r['rois'].shape[1]==4):
-                        bbox = draw_box(splash,r['rois'][0],[255,0,0])
-                    
+                        for i in range(0,r['rois'].shape[0]):
+                            if(r['scores'][i]>0.95):
+                                splash = draw_box(splash,r['rois'][i],[255,0,0])
+                                text = class_name[int(r['class_ids'][i])]
+                                print(text)
+
+                                splash = splash.copy()
+                                
+                                cv2.putText(splash, text,(r['rois'][i][1], r['rois'][i][2]),cv2.FONT_HERSHEY_COMPLEX_SMALL,2,(225,0,0))
+                                #cv2.putText(splash, "splash!",(105, 105),cv2.FONT_HERSHEY_COMPLEX_SMALL,.7,(225,0,0))
+                #print(r['scores'])
                 #bbox = draw_box(splash,r['rois'][0],[255,0,0])
                 #print(r['rois'])
                 # Add image to video writer
